@@ -198,17 +198,35 @@ func (self *MockS3) CreateMultipartUpload(*s3.CreateMultipartUploadInput) (*s3.C
 func (self *MockS3) DeleteBucketRequest(*s3.DeleteBucketInput) (*request.Request, *s3.DeleteBucketOutput) {
 	return nil, &s3.DeleteBucketOutput{}
 }
+func (self *MockS3) DeleteBucketAnalyticsConfigurationRequest(*s3.DeleteBucketAnalyticsConfigurationInput) (*request.Request, *s3.DeleteBucketAnalyticsConfigurationOutput) {
+	return nil, &s3.DeleteBucketAnalyticsConfigurationOutput{}
+}
+func (self *MockS3) DeleteBucketAnalyticsConfiguration(*s3.DeleteBucketAnalyticsConfigurationInput) (*s3.DeleteBucketAnalyticsConfigurationOutput, error) {
+	return &s3.DeleteBucketAnalyticsConfigurationOutput{}, nil
+}
 func (self *MockS3) DeleteBucketCorsRequest(*s3.DeleteBucketCorsInput) (*request.Request, *s3.DeleteBucketCorsOutput) {
 	return nil, &s3.DeleteBucketCorsOutput{}
 }
 func (self *MockS3) DeleteBucketCors(*s3.DeleteBucketCorsInput) (*s3.DeleteBucketCorsOutput, error) {
 	return &s3.DeleteBucketCorsOutput{}, nil
 }
+func (self *MockS3) DeleteBucketInventoryConfigurationRequest(*s3.DeleteBucketInventoryConfigurationInput) (*request.Request, *s3.DeleteBucketInventoryConfigurationOutput) {
+	return nil, &s3.DeleteBucketInventoryConfigurationOutput{}
+}
+func (self *MockS3) DeleteBucketInventoryConfiguration(*s3.DeleteBucketInventoryConfigurationInput) (*s3.DeleteBucketInventoryConfigurationOutput, error) {
+	return &s3.DeleteBucketInventoryConfigurationOutput{}, nil
+}
 func (self *MockS3) DeleteBucketLifecycleRequest(*s3.DeleteBucketLifecycleInput) (*request.Request, *s3.DeleteBucketLifecycleOutput) {
 	return nil, &s3.DeleteBucketLifecycleOutput{}
 }
 func (self *MockS3) DeleteBucketLifecycle(*s3.DeleteBucketLifecycleInput) (*s3.DeleteBucketLifecycleOutput, error) {
 	return &s3.DeleteBucketLifecycleOutput{}, nil
+}
+func (self *MockS3) DeleteBucketMetricsConfigurationRequest(*s3.DeleteBucketMetricsConfigurationInput) (*request.Request, *s3.DeleteBucketMetricsConfigurationOutput) {
+	return nil, &s3.DeleteBucketMetricsConfigurationOutput{}
+}
+func (self *MockS3) DeleteBucketMetricsConfiguration(*s3.DeleteBucketMetricsConfigurationInput) (*s3.DeleteBucketMetricsConfigurationOutput, error) {
+	return &s3.DeleteBucketMetricsConfigurationOutput{}, nil
 }
 func (self *MockS3) DeleteBucketPolicyRequest(*s3.DeleteBucketPolicyInput) (*request.Request, *s3.DeleteBucketPolicyOutput) {
 	return nil, &s3.DeleteBucketPolicyOutput{}
@@ -240,6 +258,12 @@ func (self *MockS3) DeleteObjectRequest(*s3.DeleteObjectInput) (*request.Request
 func (self *MockS3) DeleteObjectsRequest(*s3.DeleteObjectsInput) (*request.Request, *s3.DeleteObjectsOutput) {
 	return nil, &s3.DeleteObjectsOutput{}
 }
+func (self *MockS3) DeleteObjectTaggingRequest(*s3.DeleteObjectTaggingInput) (*request.Request, *s3.DeleteObjectTaggingOutput) {
+	return nil, &s3.DeleteObjectTaggingOutput{}
+}
+func (self *MockS3) DeleteObjectTagging(*s3.DeleteObjectTaggingInput) (*s3.DeleteObjectTaggingOutput, error) {
+	return &s3.DeleteObjectTaggingOutput{}, nil
+}
 func (self *MockS3) GetBucketAccelerateConfiguration(*s3.GetBucketAccelerateConfigurationInput) (*s3.GetBucketAccelerateConfigurationOutput, error) {
 	return &s3.GetBucketAccelerateConfigurationOutput{}, nil
 }
@@ -252,11 +276,23 @@ func (self *MockS3) GetBucketAclRequest(*s3.GetBucketAclInput) (*request.Request
 func (self *MockS3) GetBucketAcl(*s3.GetBucketAclInput) (*s3.GetBucketAclOutput, error) {
 	return &s3.GetBucketAclOutput{}, nil
 }
+func (self *MockS3) GetBucketAnalyticsConfigurationRequest(*s3.GetBucketAnalyticsConfigurationInput) (*request.Request, *s3.GetBucketAnalyticsConfigurationOutput) {
+	return nil, &s3.GetBucketAnalyticsConfigurationOutput{}
+}
+func (self *MockS3) GetBucketAnalyticsConfiguration(*s3.GetBucketAnalyticsConfigurationInput) (*s3.GetBucketAnalyticsConfigurationOutput, error) {
+	return &s3.GetBucketAnalyticsConfigurationOutput{}, nil
+}
 func (self *MockS3) GetBucketCorsRequest(*s3.GetBucketCorsInput) (*request.Request, *s3.GetBucketCorsOutput) {
 	return nil, &s3.GetBucketCorsOutput{}
 }
 func (self *MockS3) GetBucketCors(*s3.GetBucketCorsInput) (*s3.GetBucketCorsOutput, error) {
 	return &s3.GetBucketCorsOutput{}, nil
+}
+func (self *MockS3) GetBucketInventoryConfigurationRequest(*s3.GetBucketInventoryConfigurationInput) (*request.Request, *s3.GetBucketInventoryConfigurationOutput) {
+	return nil, &s3.GetBucketInventoryConfigurationOutput{}
+}
+func (self *MockS3) GetBucketInventoryConfiguration(*s3.GetBucketInventoryConfigurationInput) (*s3.GetBucketInventoryConfigurationOutput, error) {
+	return &s3.GetBucketInventoryConfigurationOutput{}, nil
 }
 func (self *MockS3) GetBucketLifecycleRequest(*s3.GetBucketLifecycleInput) (*request.Request, *s3.GetBucketLifecycleOutput) {
 	return nil, &s3.GetBucketLifecycleOutput{}
@@ -281,6 +317,12 @@ func (self *MockS3) GetBucketLoggingRequest(*s3.GetBucketLoggingInput) (*request
 }
 func (self *MockS3) GetBucketLogging(*s3.GetBucketLoggingInput) (*s3.GetBucketLoggingOutput, error) {
 	return &s3.GetBucketLoggingOutput{}, nil
+}
+func (self *MockS3) GetBucketMetricsConfigurationRequest(*s3.GetBucketMetricsConfigurationInput) (*request.Request, *s3.GetBucketMetricsConfigurationOutput) {
+	return nil, &s3.GetBucketMetricsConfigurationOutput{}
+}
+func (self *MockS3) GetBucketMetricsConfiguration(*s3.GetBucketMetricsConfigurationInput) (*s3.GetBucketMetricsConfigurationOutput, error) {
+	return &s3.GetBucketMetricsConfigurationOutput{}, nil
 }
 func (self *MockS3) GetBucketNotificationRequest(*s3.GetBucketNotificationConfigurationRequest) (*request.Request, *s3.NotificationConfigurationDeprecated) {
 	return nil, &s3.NotificationConfigurationDeprecated{}
@@ -339,6 +381,12 @@ func (self *MockS3) GetObjectAclRequest(*s3.GetObjectAclInput) (*request.Request
 func (self *MockS3) GetObjectAcl(*s3.GetObjectAclInput) (*s3.GetObjectAclOutput, error) {
 	return &s3.GetObjectAclOutput{}, nil
 }
+func (self *MockS3) GetObjectTaggingRequest(*s3.GetObjectTaggingInput) (*request.Request, *s3.GetObjectTaggingOutput) {
+	return nil, &s3.GetObjectTaggingOutput{}
+}
+func (self *MockS3) GetObjectTagging(*s3.GetObjectTaggingInput) (*s3.GetObjectTaggingOutput, error) {
+	return &s3.GetObjectTaggingOutput{}, nil
+}
 func (self *MockS3) GetObjectTorrentRequest(*s3.GetObjectTorrentInput) (*request.Request, *s3.GetObjectTorrentOutput) {
 	return nil, &s3.GetObjectTorrentOutput{}
 }
@@ -356,6 +404,24 @@ func (self *MockS3) HeadObjectRequest(*s3.HeadObjectInput) (*request.Request, *s
 }
 func (self *MockS3) HeadObject(*s3.HeadObjectInput) (*s3.HeadObjectOutput, error) {
 	return &s3.HeadObjectOutput{}, nil
+}
+func (self *MockS3) ListBucketAnalyticsConfigurationsRequest(*s3.ListBucketAnalyticsConfigurationsInput) (*request.Request, *s3.ListBucketAnalyticsConfigurationsOutput) {
+	return nil, &s3.ListBucketAnalyticsConfigurationsOutput{}
+}
+func (self *MockS3) ListBucketAnalyticsConfigurations(*s3.ListBucketAnalyticsConfigurationsInput) (*s3.ListBucketAnalyticsConfigurationsOutput, error) {
+	return &s3.ListBucketAnalyticsConfigurationsOutput{}, nil
+}
+func (self *MockS3) ListBucketInventoryConfigurationsRequest(*s3.ListBucketInventoryConfigurationsInput) (*request.Request, *s3.ListBucketInventoryConfigurationsOutput) {
+	return nil, &s3.ListBucketInventoryConfigurationsOutput{}
+}
+func (self *MockS3) ListBucketInventoryConfigurations(*s3.ListBucketInventoryConfigurationsInput) (*s3.ListBucketInventoryConfigurationsOutput, error) {
+	return &s3.ListBucketInventoryConfigurationsOutput{}, nil
+}
+func (self *MockS3) ListBucketMetricsConfigurationsRequest(*s3.ListBucketMetricsConfigurationsInput) (*request.Request, *s3.ListBucketMetricsConfigurationsOutput) {
+	return nil, &s3.ListBucketMetricsConfigurationsOutput{}
+}
+func (self *MockS3) ListBucketMetricsConfigurations(*s3.ListBucketMetricsConfigurationsInput) (*s3.ListBucketMetricsConfigurationsOutput, error) {
+	return &s3.ListBucketMetricsConfigurationsOutput{}, nil
 }
 func (self *MockS3) ListBucketsRequest(*s3.ListBucketsInput) (*request.Request, *s3.ListBucketsOutput) {
 	return nil, &s3.ListBucketsOutput{}
@@ -405,6 +471,12 @@ func (self *MockS3) ListPartsPages(*s3.ListPartsInput, func(*s3.ListPartsOutput,
 func (self *MockS3) PutBucketAclRequest(*s3.PutBucketAclInput) (*request.Request, *s3.PutBucketAclOutput) {
 	return nil, &s3.PutBucketAclOutput{}
 }
+func (self *MockS3) PutBucketAnalyticsConfigurationRequest(*s3.PutBucketAnalyticsConfigurationInput) (*request.Request, *s3.PutBucketAnalyticsConfigurationOutput) {
+	return nil, &s3.PutBucketAnalyticsConfigurationOutput{}
+}
+func (self *MockS3) PutBucketAnalyticsConfiguration(*s3.PutBucketAnalyticsConfigurationInput) (*s3.PutBucketAnalyticsConfigurationOutput, error) {
+	return &s3.PutBucketAnalyticsConfigurationOutput{}, nil
+}
 func (self *MockS3) PutBucketAccelerateConfiguration(*s3.PutBucketAccelerateConfigurationInput) (*s3.PutBucketAccelerateConfigurationOutput, error) {
 	return nil, nil
 }
@@ -419,6 +491,12 @@ func (self *MockS3) PutBucketCorsRequest(*s3.PutBucketCorsInput) (*request.Reque
 }
 func (self *MockS3) PutBucketCors(*s3.PutBucketCorsInput) (*s3.PutBucketCorsOutput, error) {
 	return &s3.PutBucketCorsOutput{}, nil
+}
+func (self *MockS3) PutBucketInventoryConfigurationRequest(*s3.PutBucketInventoryConfigurationInput) (*request.Request, *s3.PutBucketInventoryConfigurationOutput) {
+	return nil, &s3.PutBucketInventoryConfigurationOutput{}
+}
+func (self *MockS3) PutBucketInventoryConfiguration(*s3.PutBucketInventoryConfigurationInput) (*s3.PutBucketInventoryConfigurationOutput, error) {
+	return &s3.PutBucketInventoryConfigurationOutput{}, nil
 }
 func (self *MockS3) PutBucketLifecycleRequest(*s3.PutBucketLifecycleInput) (*request.Request, *s3.PutBucketLifecycleOutput) {
 	return nil, &s3.PutBucketLifecycleOutput{}
@@ -437,6 +515,12 @@ func (self *MockS3) PutBucketLoggingRequest(*s3.PutBucketLoggingInput) (*request
 }
 func (self *MockS3) PutBucketLogging(*s3.PutBucketLoggingInput) (*s3.PutBucketLoggingOutput, error) {
 	return &s3.PutBucketLoggingOutput{}, nil
+}
+func (self *MockS3) PutBucketMetricsConfigurationRequest(*s3.PutBucketMetricsConfigurationInput) (*request.Request, *s3.PutBucketMetricsConfigurationOutput) {
+	return nil, &s3.PutBucketMetricsConfigurationOutput{}
+}
+func (self *MockS3) PutBucketMetricsConfiguration(*s3.PutBucketMetricsConfigurationInput) (*s3.PutBucketMetricsConfigurationOutput, error) {
+	return &s3.PutBucketMetricsConfigurationOutput{}, nil
 }
 func (self *MockS3) PutBucketNotificationRequest(*s3.PutBucketNotificationInput) (*request.Request, *s3.PutBucketNotificationOutput) {
 	return nil, &s3.PutBucketNotificationOutput{}
@@ -492,6 +576,12 @@ func (self *MockS3) PutObjectAclRequest(*s3.PutObjectAclInput) (*request.Request
 func (self *MockS3) PutObjectAcl(*s3.PutObjectAclInput) (*s3.PutObjectAclOutput, error) {
 	return &s3.PutObjectAclOutput{}, nil
 }
+func (self *MockS3) PutObjectTaggingRequest(*s3.PutObjectTaggingInput) (*request.Request, *s3.PutObjectTaggingOutput) {
+	return nil, &s3.PutObjectTaggingOutput{}
+}
+func (self *MockS3) PutObjectTagging(*s3.PutObjectTaggingInput) (*s3.PutObjectTaggingOutput, error) {
+	return &s3.PutObjectTaggingOutput{}, nil
+}
 func (self *MockS3) RestoreObjectRequest(*s3.RestoreObjectInput) (*request.Request, *s3.RestoreObjectOutput) {
 	return nil, &s3.RestoreObjectOutput{}
 }
@@ -509,6 +599,18 @@ func (self *MockS3) UploadPartCopyRequest(*s3.UploadPartCopyInput) (*request.Req
 }
 func (self *MockS3) UploadPartCopy(*s3.UploadPartCopyInput) (*s3.UploadPartCopyOutput, error) {
 	return &s3.UploadPartCopyOutput{}, nil
+}
+func (self *MockS3) WaitUntilBucketExists(*s3.HeadBucketInput) error {
+	return nil
+}
+func (self *MockS3) WaitUntilBucketNotExists(*s3.HeadBucketInput) error {
+	return nil
+}
+func (self *MockS3) WaitUntilObjectExists(*s3.HeadObjectInput) error {
+	return nil
+}
+func (self *MockS3) WaitUntilObjectNotExists(*s3.HeadObjectInput) error {
+	return nil
 }
 
 var _ s3iface.S3API = (*MockS3)(nil)

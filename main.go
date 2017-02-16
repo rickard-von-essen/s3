@@ -6,6 +6,9 @@ import (
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/defaults"
+	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
@@ -19,6 +22,7 @@ var (
 	public       bool
 	quiet        bool
 	ignoreErrors bool
+	instanceRole bool
 	acl          string
 )
 var version string /* passed in by go build */
@@ -41,6 +45,11 @@ func validACL() bool {
 	return true
 }
 
+type S3ifaceMaybe struct {
+	conn s3iface.S3API
+	err  error
+}
+
 func Main(conn s3iface.S3API, args []string, output io.Writer) int {
 	out = output
 	exitCode := 0
@@ -52,15 +61,35 @@ func Main(conn s3iface.S3API, args []string, output io.Writer) int {
 		}
 	}
 
-	getConnection := func(c *cli.Context) s3iface.S3API {
+	getConnection := func(c *cli.Context) S3ifaceMaybe {
 		if conn == nil {
-			region := c.Parent().String("region")
 			config := aws.Config{
-				Region: aws.String(region),
+				Credentials: credentials.NewChainCredentials(
+					[]credentials.Provider{
+						&credentials.EnvProvider{},
+						&credentials.SharedCredentialsProvider{},
+						defaults.RemoteCredProvider(*(defaults.Config()), defaults.Handlers()),
+					}),
+			}
+			if c.GlobalIsSet("instance-role") {
+				sess := session.New()
+				ec2meta := ec2metadata.New(sess)
+				identity, err := ec2meta.GetInstanceIdentityDocument()
+				if err != nil {
+					return S3ifaceMaybe{conn: nil, err: err}
+				}
+				config.Region = &identity.Region
+			} else {
+				config.Region = aws.String("us-east-1")
+			}
+
+			region := c.Parent().String("region")
+			if region != "" {
+				config.Region = aws.String(region)
 			}
 			conn = s3.New(session.New(), &config)
 		}
-		return conn
+		return S3ifaceMaybe{conn, nil}
 	}
 
 	commonFlags := []cli.Flag{
@@ -85,10 +114,15 @@ func Main(conn s3iface.S3API, args []string, output io.Writer) int {
 			Usage:       "",
 			Destination: &quiet,
 		},
+		cli.BoolFlag{
+			Name:        "instance-role",
+			Usage:       "use instance/task role to get region and credentials, unless overriden by environment variables",
+			Destination: &instanceRole,
+		},
 		cli.StringFlag{
 			Name:   "region",
-			Usage:  "set region, otherwise environment variable AWS_REGION is checked, finally defaulting to us-east-1",
-			Value:  "us-east-1",
+			Usage:  "set region, otherwise environment variable AWS_REGION is checked or instance metadata, finally defaulting to us-east-1",
+			Value:  "",
 			EnvVar: "AWS_REGION",
 		},
 	}
@@ -127,8 +161,7 @@ func Main(conn s3iface.S3API, args []string, output io.Writer) int {
 					exitCode = 1
 					return
 				}
-				conn := getConnection(c)
-				err := catKeys(conn, c.Args())
+				err := catKeys(getConnection(c), c.Args())
 				checkErr(err)
 			},
 		},
@@ -142,8 +175,7 @@ func Main(conn s3iface.S3API, args []string, output io.Writer) int {
 					exitCode = 1
 					return
 				}
-				conn := getConnection(c)
-				err := getKeys(conn, c.Args())
+				err := getKeys(getConnection(c), c.Args())
 				checkErr(err)
 			},
 		},
@@ -157,10 +189,9 @@ func Main(conn s3iface.S3API, args []string, output io.Writer) int {
 					exitCode = 1
 					return
 				}
-				conn := getConnection(c)
 				find := c.Args().First()
 				urls := c.Args().Tail()
-				err := grepKeys(conn, find, urls)
+				err := grepKeys(getConnection(c), find, urls)
 				checkErr(err)
 			},
 		},
@@ -171,11 +202,9 @@ func Main(conn s3iface.S3API, args []string, output io.Writer) int {
 			Action: func(c *cli.Context) {
 				var err error
 				if len(c.Args()) < 1 {
-					conn := getConnection(c)
-					err = listBuckets(conn)
+					err = listBuckets(getConnection(c))
 				} else {
-					conn := getConnection(c)
-					err = listKeys(conn, c.Args())
+					err = listKeys(getConnection(c), c.Args())
 				}
 				checkErr(err)
 			},
@@ -190,8 +219,7 @@ func Main(conn s3iface.S3API, args []string, output io.Writer) int {
 					exitCode = 1
 					return
 				}
-				conn := getConnection(c)
-				err := putBuckets(conn, c.Args())
+				err := putBuckets(getConnection(c), c.Args())
 				checkErr(err)
 			},
 		},
@@ -213,11 +241,10 @@ func Main(conn s3iface.S3API, args []string, output io.Writer) int {
 					exitCode = 1
 					return
 				}
-				conn := getConnection(c)
 				args := c.Args()
 				sources := args[:len(args)-1]
 				destination := args[len(args)-1]
-				err := putKeys(conn, sources, destination)
+				err := putKeys(getConnection(c), sources, destination)
 				checkErr(err)
 			},
 		},
@@ -231,8 +258,7 @@ func Main(conn s3iface.S3API, args []string, output io.Writer) int {
 					exitCode = 1
 					return
 				}
-				conn := getConnection(c)
-				err := rmBuckets(conn, c.Args())
+				err := rmBuckets(getConnection(c), c.Args())
 				checkErr(err)
 			},
 		},
@@ -246,8 +272,7 @@ func Main(conn s3iface.S3API, args []string, output io.Writer) int {
 					exitCode = 1
 					return
 				}
-				conn := getConnection(c)
-				err := rmKeys(conn, c.Args())
+				err := rmKeys(getConnection(c), c.Args())
 				checkErr(err)
 			},
 		},
@@ -269,8 +294,7 @@ func Main(conn s3iface.S3API, args []string, output io.Writer) int {
 					exitCode = 1
 					return
 				}
-				conn := getConnection(c)
-				err := syncFiles(conn, c.Args()[0], c.Args()[1])
+				err := syncFiles(getConnection(c), c.Args()[0], c.Args()[1])
 				checkErr(err)
 			},
 		},

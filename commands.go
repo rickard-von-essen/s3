@@ -38,8 +38,11 @@ func extractBucketPath(url string) (string, string) {
 	return parts[1], parts[2]
 }
 
-func listBuckets(conn s3iface.S3API) error {
-	output, err := conn.ListBuckets(nil)
+func listBuckets(c S3ifaceMaybe) error {
+	if c.err != nil {
+		return c.err
+	}
+	output, err := c.conn.ListBuckets(nil)
 	if err != nil {
 		return err
 	}
@@ -49,10 +52,13 @@ func listBuckets(conn s3iface.S3API) error {
 	return nil
 }
 
-func iterateKeys(conn s3iface.S3API, urls []string, callback func(file File) error) error {
+func iterateKeys(c S3ifaceMaybe, urls []string, callback func(file File) error) error {
+	if c.err != nil {
+		return c.err
+	}
 	found := false
 	for _, url := range urls {
-		fs := getFilesystem(conn, url)
+		fs := getFilesystem(c.conn, url)
 		ch := fs.Files()
 		for file := range ch {
 			found = true
@@ -71,7 +77,10 @@ func iterateKeys(conn s3iface.S3API, urls []string, callback func(file File) err
 	return nil
 }
 
-func iterateKeysParallel(conn s3iface.S3API, urls []string, callback func(file File) error) error {
+func iterateKeysParallel(c S3ifaceMaybe, urls []string, callback func(file File) error) error {
+	if c.err != nil {
+		return c.err
+	}
 	// create pool for processing
 	var err error
 	wg := sync.WaitGroup{}
@@ -90,7 +99,7 @@ func iterateKeysParallel(conn s3iface.S3API, urls []string, callback func(file F
 		}()
 	}
 
-	e := iterateKeys(conn, urls, func(file File) error {
+	e := iterateKeys(c, urls, func(file File) error {
 		q <- file
 		return nil
 	})
@@ -103,9 +112,12 @@ func iterateKeysParallel(conn s3iface.S3API, urls []string, callback func(file F
 	return err
 }
 
-func listKeys(conn s3iface.S3API, urls []string) error {
+func listKeys(c S3ifaceMaybe, urls []string) error {
+	if c.err != nil {
+		return c.err
+	}
 	var count, totalSize int64
-	err := iterateKeys(conn, urls, func(file File) error {
+	err := iterateKeys(c, urls, func(file File) error {
 		if quiet {
 			fmt.Fprintln(out, file)
 		} else {
@@ -124,14 +136,17 @@ func listKeys(conn s3iface.S3API, urls []string) error {
 	return nil
 }
 
-func getKeys(conn s3iface.S3API, urls []string) error {
+func getKeys(c S3ifaceMaybe, urls []string) error {
+	if c.err != nil {
+		return c.err
+	}
 	for _, url := range urls {
 		if !isS3Url(url) {
 			return errors.New("s3:// url required")
 		}
 	}
 
-	err := iterateKeysParallel(conn, urls, func(file File) error {
+	err := iterateKeysParallel(c, urls, func(file File) error {
 		reader, err := file.Reader()
 		if err != nil {
 			return err
@@ -164,8 +179,11 @@ func getKeys(conn s3iface.S3API, urls []string) error {
 	return err
 }
 
-func catKeys(conn s3iface.S3API, urls []string) error {
-	return iterateKeysParallel(conn, urls, func(file File) error {
+func catKeys(c S3ifaceMaybe, urls []string) error {
+	if c.err != nil {
+		return c.err
+	}
+	return iterateKeysParallel(c, urls, func(file File) error {
 		reader, err := file.Reader()
 		if err != nil {
 			return err
@@ -187,9 +205,12 @@ func catKeys(conn s3iface.S3API, urls []string) error {
 	})
 }
 
-func grepKeys(conn s3iface.S3API, find string, urls []string) error {
+func grepKeys(c S3ifaceMaybe, find string, urls []string) error {
+	if c.err != nil {
+		return c.err
+	}
 	findBytes := []byte(find)
-	return iterateKeysParallel(conn, urls, func(file File) error {
+	return iterateKeysParallel(c, urls, func(file File) error {
 		reader, err := file.Reader()
 		if err != nil {
 			return err
@@ -225,7 +246,10 @@ func grepKeys(conn s3iface.S3API, find string, urls []string) error {
 	})
 }
 
-func deleteBatch(conn s3iface.S3API, bucket string, batch []*s3.ObjectIdentifier) error {
+func deleteBatch(c S3ifaceMaybe, bucket string, batch []*s3.ObjectIdentifier) error {
+	if c.err != nil {
+		return c.err
+	}
 	if !dryRun {
 		deleteRequest := s3.Delete{
 			Objects: batch,
@@ -234,13 +258,16 @@ func deleteBatch(conn s3iface.S3API, bucket string, batch []*s3.ObjectIdentifier
 			Bucket: aws.String(bucket),
 			Delete: &deleteRequest,
 		}
-		_, err := conn.DeleteObjects(&input)
+		_, err := c.conn.DeleteObjects(&input)
 		return err
 	}
 	return nil
 }
 
-func rmKeys(conn s3iface.S3API, urls []string) error {
+func rmKeys(c S3ifaceMaybe, urls []string) error {
+	if c.err != nil {
+		return c.err
+	}
 	for _, url := range urls {
 		if !isS3Url(url) {
 			return errors.New("Cowardly refusing to remove local files. Use rm.")
@@ -250,7 +277,7 @@ func rmKeys(conn s3iface.S3API, urls []string) error {
 	var bucket string
 	start := time.Now()
 	var deleted int
-	err := iterateKeys(conn, urls, func(file File) error {
+	err := iterateKeys(c, urls, func(file File) error {
 		deleted += 1
 		if !quiet {
 			fmt.Fprintf(out, "D %s\n", file)
@@ -259,14 +286,14 @@ func rmKeys(conn s3iface.S3API, urls []string) error {
 		case *S3File:
 			// optimize as a batch delete
 			if t.bucket != bucket && len(batch) > 0 {
-				deleteBatch(conn, bucket, batch)
+				deleteBatch(c, bucket, batch)
 				batch = batch[:0]
 			}
 			bucket = t.bucket
 			obj := s3.ObjectIdentifier{Key: t.object.Key}
 			batch = append(batch, &obj)
 			if len(batch) == 1000 {
-				deleteBatch(conn, bucket, batch)
+				deleteBatch(c, bucket, batch)
 				batch = batch[:0]
 			}
 
@@ -283,7 +310,7 @@ func rmKeys(conn s3iface.S3API, urls []string) error {
 
 	// final batch
 	if len(batch) > 0 {
-		deleteBatch(conn, bucket, batch)
+		deleteBatch(c, bucket, batch)
 	}
 	end := time.Now()
 	took := end.Sub(start)
@@ -291,11 +318,14 @@ func rmKeys(conn s3iface.S3API, urls []string) error {
 	return nil
 }
 
-func rmBuckets(conn s3iface.S3API, buckets []string) error {
+func rmBuckets(c S3ifaceMaybe, buckets []string) error {
+	if c.err != nil {
+		return c.err
+	}
 	for _, name := range buckets {
 		bucket, _ := extractBucketPath(name)
 		input := s3.DeleteBucketInput{Bucket: aws.String(bucket)}
-		_, err := conn.DeleteBucket(&input)
+		_, err := c.conn.DeleteBucket(&input)
 		if err != nil {
 			return err
 		}
@@ -317,13 +347,16 @@ took: %s (%.1f ops/s)
 `, added, deleted, updated, unchanged, took, rate)
 }
 
-func putBuckets(conn s3iface.S3API, buckets []string) error {
+func putBuckets(c S3ifaceMaybe, buckets []string) error {
+	if c.err != nil {
+		return c.err
+	}
 	for _, bucket := range buckets {
 		input := s3.CreateBucketInput{
 			ACL:    aws.String(acl),
 			Bucket: aws.String(bucket),
 		}
-		_, err := conn.CreateBucket(&input)
+		_, err := c.conn.CreateBucket(&input)
 		if err != nil {
 			return err
 		}
@@ -331,14 +364,17 @@ func putBuckets(conn s3iface.S3API, buckets []string) error {
 	return nil
 }
 
-func putKeys(conn s3iface.S3API, sources []string, destination string) error {
+func putKeys(c S3ifaceMaybe, sources []string, destination string) error {
+	if c.err != nil {
+		return c.err
+	}
 	start := time.Now()
 	if !isS3Url(destination) {
 		return errors.New("s3:// url required for destination")
 	}
-	dfs := getFilesystem(conn, destination)
+	dfs := getFilesystem(c.conn, destination)
 	var added int
-	err := iterateKeysParallel(conn, sources, func(file File) error {
+	err := iterateKeysParallel(c, sources, func(file File) error {
 		reader, err := file.Reader()
 		if err != nil {
 			return err
@@ -426,10 +462,13 @@ func processAction(action Action, fs2 Filesystem) error {
 	return nil
 }
 
-func syncFiles(conn s3iface.S3API, src, dest string) error {
+func syncFiles(c S3ifaceMaybe, src, dest string) error {
+	if c.err != nil {
+		return c.err
+	}
 	start := time.Now()
-	fs1 := getFilesystem(conn, src)
-	fs2 := getFilesystem(conn, dest)
+	fs1 := getFilesystem(c.conn, src)
+	fs2 := getFilesystem(c.conn, dest)
 	ch1 := fs1.Files()
 	f1 := <-ch1
 
