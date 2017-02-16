@@ -2,6 +2,8 @@ export GO15VENDOREXPERIMENT=1
 
 package = github.com/barnybug/s3/cmd/s3
 buildargs = -ldflags '-X github.com/barnybug/s3.version=${TRAVIS_TAG}'
+GOOS ?= linux
+GOARCH ?= amd64
 
 .PHONY: release
 
@@ -19,6 +21,10 @@ test: deps build-deps
 
 install:
 	go install -v ./cmd/s3
+
+build-only:
+	GOOS=$(GOOS) GOARCH=$(GOARCH) go build ./cmd/s3
+
 
 release:
 	mkdir -p release
