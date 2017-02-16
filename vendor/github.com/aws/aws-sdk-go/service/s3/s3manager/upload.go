@@ -175,6 +175,9 @@ type UploadInput struct {
 	// The type of storage to use for the object. Defaults to 'STANDARD'.
 	StorageClass *string `location:"header" locationName:"x-amz-storage-class" type:"string"`
 
+	// The tag-set for the object. The tag-set must be encoded as URL Query parameters
+	Tagging *string `location:"header" locationName:"x-amz-tagging" type:"string"`
+
 	// If the bucket is configured as a website, redirects requests for this object
 	// to another object in the same bucket or to an external URL. Amazon S3 stores
 	// the value of this header in the object metadata.
@@ -409,8 +412,12 @@ func (u *uploader) initSize() {
 // does not need to be wrapped in a mutex because nextReader is only called
 // from the main thread.
 func (u *uploader) nextReader() (io.ReadSeeker, int, error) {
+	type readerAtSeeker interface {
+		io.ReaderAt
+		io.ReadSeeker
+	}
 	switch r := u.in.Body.(type) {
-	case io.ReaderAt:
+	case readerAtSeeker:
 		var err error
 
 		n := u.ctx.PartSize

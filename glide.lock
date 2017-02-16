@@ -1,8 +1,8 @@
 hash: 4f8e10bb7cd1b9eb0884504b26a4efeb2c0e78eb72d2414f40a828006c047cd2
-updated: 2016-08-28T13:24:35.234935859+01:00
+updated: 2017-02-09T14:24:46.863734103+01:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: e39222bf4583af667250cfd83a41388937ba56d4
+  version: 3e9dd391ac96e9c00530e496f8709d815d757445
   repo: https://github.com/aws/aws-sdk-go
   vcs: git
   subpackages:
@@ -18,10 +18,10 @@ imports:
   - aws/credentials/stscreds
   - aws/defaults
   - aws/ec2metadata
+  - aws/endpoints
   - aws/request
   - aws/session
   - aws/signer/v4
-  - private/endpoints
   - private/protocol
   - private/protocol/query
   - private/protocol/query/queryutil
